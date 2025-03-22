@@ -20,17 +20,17 @@ export const SummaryContent: FC<SummaryContentProps> = ({
   if (isLoading) {
     return (
       <div className="space-y-2">
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-5/6" />
-        <Skeleton className="h-4 w-4/5" />
+        <Skeleton className="h-4 w-full bg-gray-800" />
+        <Skeleton className="h-4 w-full bg-gray-800" />
+        <Skeleton className="h-4 w-5/6 bg-gray-800" />
+        <Skeleton className="h-4 w-4/5 bg-gray-800" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <Alert variant="destructive">
+      <Alert variant="destructive" className="bg-gray-900 border-red-900 text-red-400">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>
@@ -43,7 +43,7 @@ export const SummaryContent: FC<SummaryContentProps> = ({
   if (!summary) {
     return (
       <div className="text-center py-6">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-300 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-600 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5z"/>
           <path d="M8 7h8M8 11h8M8 15h5"/>
         </svg>
@@ -59,14 +59,14 @@ export const SummaryContent: FC<SummaryContentProps> = ({
       if (summary.shortSummary.includes('•')) {
         // Already has bullet points
         return (
-          <div className="text-sm text-gray-600 whitespace-pre-line">
+          <div className="text-sm text-gray-300 whitespace-pre-line">
             {summary.shortSummary}
           </div>
         );
       } else {
         // Convert to bullet points if not already formatted
         return (
-          <ul className="list-disc pl-5 space-y-1 text-sm text-gray-600">
+          <ul className="list-disc pl-5 space-y-1 text-sm text-gray-300">
             {summary.shortSummary.split(/\n|\./).filter(point => point.trim().length > 10).map((point, index) => (
               <li key={index}>{point.trim()}</li>
             ))}
@@ -81,7 +81,7 @@ export const SummaryContent: FC<SummaryContentProps> = ({
   // Medium Summary (Extract)
   if (activeTab === "medium") {
     return (
-      <div className="text-sm text-gray-600">
+      <div className="text-sm text-gray-300">
         {summary.mediumSummary ? (
           <p className="whitespace-pre-line">{summary.mediumSummary}</p>
         ) : (
@@ -94,7 +94,7 @@ export const SummaryContent: FC<SummaryContentProps> = ({
   // Detailed Summary
   if (activeTab === "detailed") {
     return (
-      <div className="text-sm text-gray-600">
+      <div className="text-sm text-gray-300">
         {summary.detailedSummary ? (
           <div className="whitespace-pre-line">{summary.detailedSummary}</div>
         ) : (

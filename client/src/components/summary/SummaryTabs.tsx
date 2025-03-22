@@ -28,7 +28,7 @@ export const SummaryTabs: FC<SummaryTabsProps> = ({ paperId }) => {
       toast({
         title: "Summary regenerated",
         description: "The summary has been successfully regenerated.",
-        variant: "success",
+        variant: "default",
       });
     } catch (error) {
       console.error("Error regenerating summary:", error);
