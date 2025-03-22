@@ -1,0 +1,56 @@
+### **Plan for ResearchPaperHub Implementation**  
+
+#### **1. UI Enhancements**  
+- Improve UI while maintaining the existing theme.  
+- Ensure a **clean, modern, and intuitive** design using **Tailwind CSS**.  
+- Improve **paper filtering UI** for better user experience.  
+
+#### **2. Research Paper Aggregation**  
+- Integrate APIs to fetch real-time research papers from:  
+  - ArXiv  
+  - IEEE Xplore  
+  - Springer  
+  - PubMed  
+  - ScienceDirect  
+  - CrossRef (for DOI lookup)  
+- Ensure **every filter** (domain, date, platform, etc.) has **papers available**.  
+- Add a **manual fallback dataset** to ensure a good variety of papers.  
+
+#### **3. Search & Filtering System**  
+- Implement **keyword-based search**.  
+- Filters:  
+  - **Publication Platform**  
+  - **Publication Date** (Last 24h, 7 Days, Month, Custom)  
+  - **Domain** (AI, Medicine, Physics, etc.)  
+  - **Author**  
+  - **Journal Name**  
+- Sorting: **Relevance, Citation Count, Publication Date**  
+
+#### **4. Summarization Feature (Main Focus)**  
+- **Three levels of summary:**  
+  - **Short Summary** (Bullet points – GPT/BART Model)  
+  - **Medium Summary** (Extractive summarization – Hugging Face Transformers)  
+  - **Detailed Summary** (Abstractive summarization – Trained model)  
+- **Regenerate Summary** feature using **Google Gemini API**.  
+
+#### **5. Save (Bookmark) Papers Feature**  
+- Users can **save research papers** for later.  
+- Stored in **MongoDB**, accessible via a **“Saved Papers”** section.  
+
+#### **6. Backend Improvements**  
+- Use **Node.js with Express** for API handling.  
+- Improve API request handling for **faster fetching & filtering**.  
+- **Google Gemini API** integration for summary generation.  
+- **Web scraping (if needed)** for additional papers.  
+
+#### **7. Deployment & Local Setup**  
+- Ensure **easy local setup** (minimal configuration).  
+- Provide **clear instructions** for running the project locally.  
+- Deployment options: **Vercel (Frontend), AWS/DigitalOcean (Backend), MongoDB Atlas (Database)**.  
+
+#### **8. Additional Features & Testing**  
+- Ensure **proper error handling** for API failures.  
+- Optimize **performance** for fetching & summarization.  
+- Ensure the website works **smoothly across devices**.  
+
+Let me know if you need any API keys or additional modifications! 🚀
