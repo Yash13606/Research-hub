@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { PaperCard } from "@/components/PaperCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle } from "lucide-react";
@@ -21,13 +22,13 @@ const SavedPapers = () => {
     limit: 12
   });
 
-  const { data: savedPapers, isLoading, error } = useQuery({
+  const { data: savedPapers = [], isLoading, error } = useQuery<Paper[]>({
     queryKey: [`/api/users/${userId}/saved-papers`],
     staleTime: 60000, // 1 minute
   });
 
   // Filter papers based on search criteria
-  const filteredPapers = savedPapers ? filterPapers(savedPapers, filter) : [];
+  const filteredPapers = filterPapers(savedPapers, filter);
 
   const handleSearch = (newFilter: SearchFilter) => {
     setFilter(newFilter);
@@ -124,20 +125,21 @@ function filterPapers(papers: Paper[], filter: SearchFilter): Paper[] {
       return false;
     }
     
-    // Filter by domain
-    if (filter.domain && paper.domain !== filter.domain) {
+    // Filter by domain (case-insensitive)
+    if (filter.domain && paper.domain.toLowerCase() !== filter.domain.toLowerCase()) {
       return false;
     }
     
     // Filter by author
     if (filter.author && !paper.authors.some(author => 
-      author.toLowerCase().includes(filter.author.toLowerCase())
+      author.toLowerCase().includes(filter.author?.toLowerCase() || '')
     )) {
       return false;
     }
     
     // Filter by journal
-    if (filter.journal && !(paper.journal?.toLowerCase().includes(filter.journal.toLowerCase()))) {
+    if (filter.journal && paper.journal && 
+        !paper.journal.toLowerCase().includes(filter.journal.toLowerCase())) {
       return false;
     }
     
