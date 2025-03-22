@@ -127,8 +127,10 @@ export class MemStorage implements IStorage {
     }
     
     if (filter.domain) {
+      // Case-insensitive search for domain to improve matching
+      const domainQuery = filter.domain.toLowerCase();
       filteredPapers = filteredPapers.filter(paper => 
-        paper.domain === filter.domain
+        paper.domain.toLowerCase() === domainQuery
       );
     }
     
@@ -148,7 +150,7 @@ export class MemStorage implements IStorage {
     
     if (filter.dateRange) {
       const now = new Date();
-      let startDate: Date;
+      let startDate: Date | undefined;
       
       switch (filter.dateRange) {
         case '24h':
@@ -165,7 +167,7 @@ export class MemStorage implements IStorage {
             startDate = new Date(filter.customStartDate);
             const endDate = filter.customEndDate ? new Date(filter.customEndDate) : now;
             filteredPapers = filteredPapers.filter(paper => 
-              paper.publishedDate >= startDate && paper.publishedDate <= endDate
+              paper.publishedDate >= startDate! && paper.publishedDate <= endDate
             );
           }
           break;
@@ -179,7 +181,11 @@ export class MemStorage implements IStorage {
     // Apply sorting
     switch (filter.sortBy) {
       case 'citations':
-        filteredPapers.sort((a, b) => b.citation_count - a.citation_count);
+        filteredPapers.sort((a, b) => {
+          const aCitations = a.citation_count || 0;
+          const bCitations = b.citation_count || 0;
+          return bCitations - aCitations;
+        });
         break;
       case 'date_desc':
         filteredPapers.sort((a, b) => b.publishedDate.getTime() - a.publishedDate.getTime());
@@ -341,13 +347,8 @@ export class MemStorage implements IStorage {
       this.createPaper(paper);
     }
     
-    // Save some papers for the test user
-    for (let i = 1; i <= 5; i++) {
-      this.savePaper({
-        userId: 1,
-        paperId: i,
-      });
-    }
+    // We're not pre-saving papers anymore to allow users to save papers themselves
+    // Previously, papers 1-5 were pre-saved, causing "Paper already saved" errors
     
     // Create summaries for some papers
     for (let i = 1; i <= 10; i++) {
