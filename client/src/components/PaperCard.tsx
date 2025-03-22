@@ -25,13 +25,13 @@ export const PaperCard: FC<PaperCardProps> = ({ paper, isSaved = false, userId =
   // Function to get platform badge color
   const getPlatformColor = (platform: string) => {
     const platformColors: Record<string, string> = {
-      "ArXiv": "bg-indigo-50 text-primary",
-      "IEEE Xplore": "bg-blue-50 text-blue-600",
-      "Springer": "bg-green-50 text-green-600",
-      "PubMed": "bg-red-50 text-red-600",
-      "ScienceDirect": "bg-orange-50 text-orange-600"
+      "ArXiv": "bg-green-900/10 text-green-400",
+      "IEEE Xplore": "bg-green-900/10 text-green-500",
+      "Springer": "bg-green-900/10 text-green-400",
+      "PubMed": "bg-green-900/10 text-green-500",
+      "ScienceDirect": "bg-green-900/10 text-green-400"
     };
-    return platformColors[platform] || "bg-gray-50 text-gray-600";
+    return platformColors[platform] || "bg-green-900/10 text-green-500";
   };
   
   // Mutations
@@ -79,7 +79,7 @@ export const PaperCard: FC<PaperCardProps> = ({ paper, isSaved = false, userId =
   };
   
   return (
-    <Card className="paper-card overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
+    <Card className="paper-card overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-200 bg-gray-900 border-gray-800">
       <div className="p-5">
         <div className="flex items-start justify-between">
           <div className="flex-1">
@@ -87,17 +87,17 @@ export const PaperCard: FC<PaperCardProps> = ({ paper, isSaved = false, userId =
               <span className={`px-2 py-1 text-xs font-medium rounded-md ${getPlatformColor(paper.platform)}`}>
                 {paper.platform}
               </span>
-              <span className="ml-2 text-xs text-gray-500">{formattedDate}</span>
+              <span className="ml-2 text-xs text-gray-400">{formattedDate}</span>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-1.5">{paper.title}</h3>
-            <p className="text-sm text-gray-500 mb-2">{paper.authors.join(", ")}</p>
-            <div className="text-sm text-gray-600 line-clamp-3">
+            <h3 className="text-lg font-semibold text-white mb-1.5">{paper.title}</h3>
+            <p className="text-sm text-gray-400 mb-2">{paper.authors.join(", ")}</p>
+            <div className="text-sm text-gray-300 line-clamp-3">
               {paper.abstract}
             </div>
           </div>
           <div className="ml-4 flex flex-col items-center space-y-2">
             <button 
-              className="p-1.5 rounded-full hover:bg-gray-100"
+              className="p-1.5 rounded-full hover:bg-gray-800"
               onClick={handleSaveToggle}
               disabled={savePaperMutation.isPending || removeSavedPaperMutation.isPending}
             >
@@ -108,7 +108,7 @@ export const PaperCard: FC<PaperCardProps> = ({ paper, isSaved = false, userId =
               )}
             </button>
             <button 
-              className="p-1.5 rounded-full hover:bg-gray-100"
+              className="p-1.5 rounded-full hover:bg-gray-800"
               onClick={handleShare}
             >
               <Share2 className="text-gray-400 hover:text-primary h-5 w-5" />
@@ -118,10 +118,10 @@ export const PaperCard: FC<PaperCardProps> = ({ paper, isSaved = false, userId =
         
         <div className="flex items-center justify-between mt-4">
           <div className="flex items-center text-sm">
-            <span className="flex items-center text-gray-600 mr-3">
+            <span className="flex items-center text-gray-400 mr-3">
               <Eye className="h-4 w-4 mr-1" /> {paper.viewCount.toLocaleString()}
             </span>
-            <span className="flex items-center text-gray-600">
+            <span className="flex items-center text-gray-400">
               <FileText className="h-4 w-4 mr-1" /> {paper.pageCount || "?"} pages
             </span>
           </div>
@@ -129,7 +129,7 @@ export const PaperCard: FC<PaperCardProps> = ({ paper, isSaved = false, userId =
             <Button
               onClick={() => setExpanded(!expanded)}
               variant="outline"
-              className="px-3 py-1.5 text-sm font-medium text-primary bg-indigo-50 hover:bg-indigo-100 focus:outline-none border-indigo-100"
+              className="px-3 py-1.5 text-sm font-medium text-primary bg-green-900/10 hover:bg-green-900/20 focus:outline-none border-green-900/20"
             >
               {expanded ? "Hide Summary" : "View Summary"}
             </Button>
@@ -139,7 +139,7 @@ export const PaperCard: FC<PaperCardProps> = ({ paper, isSaved = false, userId =
       
       {/* Expandable Summary Section */}
       {expanded && (
-        <div className="px-5 pt-2 pb-5 border-t border-gray-100 bg-gray-50">
+        <div className="px-5 pt-2 pb-5 border-t border-gray-800 bg-gray-950">
           <SummaryTabs paperId={paper.id} />
         </div>
       )}
