@@ -1,0 +1,108 @@
+import { FC } from "react";
+import { Summary } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
+interface SummaryContentProps {
+  summary: Summary | undefined;
+  activeTab: "short" | "medium" | "detailed";
+  isLoading: boolean;
+  error: Error | null;
+}
+
+export const SummaryContent: FC<SummaryContentProps> = ({ 
+  summary, 
+  activeTab, 
+  isLoading, 
+  error 
+}) => {
+  if (isLoading) {
+    return (
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6" />
+        <Skeleton className="h-4 w-4/5" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>
+          Failed to load summary. Please try regenerating the summary.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (!summary) {
+    return (
+      <div className="text-center py-6">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-300 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5z"/>
+          <path d="M8 7h8M8 11h8M8 15h5"/>
+        </svg>
+        <p className="text-sm text-gray-500">Summary not available.</p>
+      </div>
+    );
+  }
+
+  // Short Summary (Bullet Points)
+  if (activeTab === "short") {
+    // Handle bullet points display
+    if (summary.shortSummary) {
+      if (summary.shortSummary.includes('•')) {
+        // Already has bullet points
+        return (
+          <div className="text-sm text-gray-600 whitespace-pre-line">
+            {summary.shortSummary}
+          </div>
+        );
+      } else {
+        // Convert to bullet points if not already formatted
+        return (
+          <ul className="list-disc pl-5 space-y-1 text-sm text-gray-600">
+            {summary.shortSummary.split(/\n|\./).filter(point => point.trim().length > 10).map((point, index) => (
+              <li key={index}>{point.trim()}</li>
+            ))}
+          </ul>
+        );
+      }
+    } else {
+      return <p className="text-sm text-gray-500">Short summary not available.</p>;
+    }
+  }
+
+  // Medium Summary (Extract)
+  if (activeTab === "medium") {
+    return (
+      <div className="text-sm text-gray-600">
+        {summary.mediumSummary ? (
+          <p className="whitespace-pre-line">{summary.mediumSummary}</p>
+        ) : (
+          <p className="text-gray-500">Medium summary not available.</p>
+        )}
+      </div>
+    );
+  }
+
+  // Detailed Summary
+  if (activeTab === "detailed") {
+    return (
+      <div className="text-sm text-gray-600">
+        {summary.detailedSummary ? (
+          <div className="whitespace-pre-line">{summary.detailedSummary}</div>
+        ) : (
+          <p className="text-gray-500">Detailed summary not available.</p>
+        )}
+      </div>
+    );
+  }
+
+  return null;
+};
