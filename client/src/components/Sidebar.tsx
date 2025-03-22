@@ -47,44 +47,44 @@ export const Sidebar: FC<SidebarProps> = ({ onCloseMobile }) => {
       <nav className="px-4 py-2 flex-1">
         <div className="space-y-1">
           <Link href="/">
-            <a className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg ${
+            <div className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg ${
               isActive('/') 
-                ? 'bg-indigo-50 text-primary' 
-                : 'text-gray-600 hover:bg-gray-50 hover:text-primary'
+                ? 'bg-green-900/10 text-primary' 
+                : 'text-gray-300 hover:bg-gray-800 hover:text-primary'
             }`}>
               <Home className="mr-3 h-5 w-5" />
               <span>Home</span>
-            </a>
+            </div>
           </Link>
           <Link href="/saved">
-            <a className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg ${
+            <div className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg ${
               isActive('/saved') 
-                ? 'bg-indigo-50 text-primary' 
-                : 'text-gray-600 hover:bg-gray-50 hover:text-primary'
+                ? 'bg-green-900/10 text-primary' 
+                : 'text-gray-300 hover:bg-gray-800 hover:text-primary'
             }`}>
               <Bookmark className="mr-3 h-5 w-5" />
               <span>Saved Papers</span>
-            </a>
+            </div>
           </Link>
           <Link href="/recent">
-            <a className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg ${
+            <div className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg ${
               isActive('/recent') 
-                ? 'bg-indigo-50 text-primary' 
-                : 'text-gray-600 hover:bg-gray-50 hover:text-primary'
+                ? 'bg-green-900/10 text-primary' 
+                : 'text-gray-300 hover:bg-gray-800 hover:text-primary'
             }`}>
               <History className="mr-3 h-5 w-5" />
               <span>Recent Searches</span>
-            </a>
+            </div>
           </Link>
           <Link href="/settings">
-            <a className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg ${
+            <div className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg ${
               isActive('/settings') 
-                ? 'bg-indigo-50 text-primary' 
-                : 'text-gray-600 hover:bg-gray-50 hover:text-primary'
+                ? 'bg-green-900/10 text-primary' 
+                : 'text-gray-300 hover:bg-gray-800 hover:text-primary'
             }`}>
               <Settings className="mr-3 h-5 w-5" />
               <span>Settings</span>
-            </a>
+            </div>
           </Link>
         </div>
 
