@@ -45,13 +45,13 @@ export const SummaryTabs: FC<SummaryTabsProps> = ({ paperId }) => {
   return (
     <div>
       {/* Summary Tabs */}
-      <div className="flex border-b border-gray-200 mb-4">
+      <div className="flex border-b border-gray-800 mb-4">
         <button 
           onClick={() => setActiveTab("short")} 
           className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${
             activeTab === "short" 
               ? "border-primary text-primary" 
-              : "border-transparent text-gray-500 hover:text-gray-700"
+              : "border-transparent text-gray-400 hover:text-gray-200"
           }`}
         >
           Short
@@ -61,7 +61,7 @@ export const SummaryTabs: FC<SummaryTabsProps> = ({ paperId }) => {
           className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${
             activeTab === "medium" 
               ? "border-primary text-primary" 
-              : "border-transparent text-gray-500 hover:text-gray-700"
+              : "border-transparent text-gray-400 hover:text-gray-200"
           }`}
         >
           Medium
@@ -71,7 +71,7 @@ export const SummaryTabs: FC<SummaryTabsProps> = ({ paperId }) => {
           className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${
             activeTab === "detailed" 
               ? "border-primary text-primary" 
-              : "border-transparent text-gray-500 hover:text-gray-700"
+              : "border-transparent text-gray-400 hover:text-gray-200"
           }`}
         >
           Detailed
@@ -90,13 +90,13 @@ export const SummaryTabs: FC<SummaryTabsProps> = ({ paperId }) => {
         <Button
           onClick={handleRegenerateSummary}
           variant="ghost"
-          className="text-sm text-primary hover:text-indigo-700 hover:bg-indigo-50 p-2"
+          className="text-sm text-primary hover:text-green-400 hover:bg-green-900/20 p-2"
           disabled={isLoading || isRegenerating}
         >
           <RefreshCcw className={`h-4 w-4 mr-1 ${isRegenerating ? 'animate-spin' : ''}`} />
           {isRegenerating ? 'Regenerating...' : 'Regenerate Summary'}
         </Button>
-        <a href="#" className="text-sm text-primary hover:text-indigo-700 flex items-center">
+        <a href="#" className="text-sm text-primary hover:text-green-400 flex items-center">
           View Full Paper <ArrowRight className="h-4 w-4 ml-1" />
         </a>
       </div>

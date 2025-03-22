@@ -35,38 +35,38 @@ export const AdvancedFilters: FC<AdvancedFiltersProps> = ({
   domains
 }) => {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+    <div className="bg-gray-900 rounded-lg border border-gray-800 shadow-sm">
       <div 
         className="px-4 py-3 flex justify-between items-center cursor-pointer"
         onClick={onToggleExpand}
       >
         <div className="flex items-center">
-          <Filter className="h-5 w-5 text-gray-500 mr-2" />
-          <span className="font-medium">Advanced Filters</span>
+          <Filter className="h-5 w-5 text-gray-400 mr-2" />
+          <span className="font-medium text-gray-200">Advanced Filters</span>
         </div>
         {isExpanded ? (
-          <ChevronUp className="h-5 w-5 text-gray-500" />
+          <ChevronUp className="h-5 w-5 text-gray-400" />
         ) : (
-          <ChevronDown className="h-5 w-5 text-gray-500" />
+          <ChevronDown className="h-5 w-5 text-gray-400" />
         )}
       </div>
       
       {isExpanded && (
-        <div className="px-4 py-3 border-t border-gray-200">
+        <div className="px-4 py-3 border-t border-gray-800">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Publication Platform Filter */}
             <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-1">Publication Platform</Label>
+              <Label className="block text-sm font-medium text-gray-300 mb-1">Publication Platform</Label>
               <Select
-                value={filter.platform}
-                onValueChange={(value) => onFilterChange({ platform: value })}
+                value={filter.platform || "all_platforms"}
+                onValueChange={(value) => onFilterChange({ platform: value === "all_platforms" ? "" : value })}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full bg-gray-800 border-gray-700 text-gray-200">
                   <SelectValue placeholder="All Platforms" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-gray-800 border-gray-700 text-gray-200">
                   <SelectGroup>
-                    <SelectItem value="">All Platforms</SelectItem>
+                    <SelectItem value="all_platforms">All Platforms</SelectItem>
                     {platforms.map((platform) => (
                       <SelectItem key={platform} value={platform}>
                         {platform}
@@ -79,17 +79,17 @@ export const AdvancedFilters: FC<AdvancedFiltersProps> = ({
             
             {/* Publication Date Filter */}
             <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-1">Publication Date</Label>
+              <Label className="block text-sm font-medium text-gray-300 mb-1">Publication Date</Label>
               <Select
-                value={filter.dateRange}
-                onValueChange={(value) => onFilterChange({ dateRange: value })}
+                value={filter.dateRange || "all_time"}
+                onValueChange={(value) => onFilterChange({ dateRange: value === "all_time" ? "" : value })}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full bg-gray-800 border-gray-700 text-gray-200">
                   <SelectValue placeholder="All Time" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-gray-800 border-gray-700 text-gray-200">
                   <SelectGroup>
-                    <SelectItem value="">All Time</SelectItem>
+                    <SelectItem value="all_time">All Time</SelectItem>
                     <SelectItem value="24h">Last 24 Hours</SelectItem>
                     <SelectItem value="7d">Last 7 Days</SelectItem>
                     <SelectItem value="1m">Last Month</SelectItem>
@@ -101,17 +101,17 @@ export const AdvancedFilters: FC<AdvancedFiltersProps> = ({
             
             {/* Domain Filter */}
             <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-1">Domain</Label>
+              <Label className="block text-sm font-medium text-gray-300 mb-1">Domain</Label>
               <Select
-                value={filter.domain}
-                onValueChange={(value) => onFilterChange({ domain: value })}
+                value={filter.domain || "all_domains"}
+                onValueChange={(value) => onFilterChange({ domain: value === "all_domains" ? "" : value })}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full bg-gray-800 border-gray-700 text-gray-200">
                   <SelectValue placeholder="All Domains" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-gray-800 border-gray-700 text-gray-200">
                   <SelectGroup>
-                    <SelectItem value="">All Domains</SelectItem>
+                    <SelectItem value="all_domains">All Domains</SelectItem>
                     {domains.map((domain) => (
                       <SelectItem key={domain} value={domain}>
                         {domain}
@@ -124,37 +124,39 @@ export const AdvancedFilters: FC<AdvancedFiltersProps> = ({
             
             {/* Author Filter */}
             <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-1">Author</Label>
+              <Label className="block text-sm font-medium text-gray-300 mb-1">Author</Label>
               <Input
                 type="text"
                 placeholder="Author name"
                 value={filter.author}
+                className="bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-500"
                 onChange={(e) => onFilterChange({ author: e.target.value })}
               />
             </div>
             
             {/* Journal Filter */}
             <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-1">Journal Name</Label>
+              <Label className="block text-sm font-medium text-gray-300 mb-1">Journal Name</Label>
               <Input
                 type="text"
                 placeholder="Journal name"
                 value={filter.journal}
+                className="bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-500"
                 onChange={(e) => onFilterChange({ journal: e.target.value })}
               />
             </div>
             
             {/* Sort Option */}
             <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-1">Sort By</Label>
+              <Label className="block text-sm font-medium text-gray-300 mb-1">Sort By</Label>
               <Select
-                value={filter.sortBy}
+                value={filter.sortBy || "relevance"}
                 onValueChange={(value: any) => onFilterChange({ sortBy: value })}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full bg-gray-800 border-gray-700 text-gray-200">
                   <SelectValue placeholder="Relevance" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-gray-800 border-gray-700 text-gray-200">
                   <SelectGroup>
                     <SelectItem value="relevance">Relevance</SelectItem>
                     <SelectItem value="citations">Citation Count</SelectItem>
@@ -170,18 +172,20 @@ export const AdvancedFilters: FC<AdvancedFiltersProps> = ({
           {filter.dateRange === "custom" && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div>
-                <Label className="block text-sm font-medium text-gray-700 mb-1">Start Date</Label>
+                <Label className="block text-sm font-medium text-gray-300 mb-1">Start Date</Label>
                 <Input
                   type="date"
                   value={filter.customStartDate || ""}
+                  className="bg-gray-800 border-gray-700 text-gray-200"
                   onChange={(e) => onFilterChange({ customStartDate: e.target.value })}
                 />
               </div>
               <div>
-                <Label className="block text-sm font-medium text-gray-700 mb-1">End Date</Label>
+                <Label className="block text-sm font-medium text-gray-300 mb-1">End Date</Label>
                 <Input
                   type="date"
                   value={filter.customEndDate || ""}
+                  className="bg-gray-800 border-gray-700 text-gray-200"
                   onChange={(e) => onFilterChange({ customEndDate: e.target.value })}
                 />
               </div>
@@ -193,13 +197,14 @@ export const AdvancedFilters: FC<AdvancedFiltersProps> = ({
               type="button"
               variant="outline"
               onClick={onResetFilters}
-              className="mr-3"
+              className="mr-3 border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
             >
               Reset Filters
             </Button>
             <Button
               type="button"
               onClick={onApplyFilters}
+              className="bg-primary hover:bg-green-600"
             >
               Apply Filters
             </Button>

@@ -116,7 +116,7 @@ export const SearchSection: FC<SearchSectionProps> = ({ initialFilter, onSearch 
   };
   
   const handleResetFilters = () => {
-    const resetFilter = {
+    const resetFilter: SearchFilter = {
       ...filter,
       platform: "",
       domain: "",
@@ -124,7 +124,8 @@ export const SearchSection: FC<SearchSectionProps> = ({ initialFilter, onSearch 
       journal: "",
       dateRange: "",
       sortBy: "relevance",
-      page: 1
+      page: 1,
+      limit: 10
     };
     setFilter(resetFilter);
     onSearch(resetFilter);
@@ -133,12 +134,12 @@ export const SearchSection: FC<SearchSectionProps> = ({ initialFilter, onSearch 
   return (
     <section className="mb-8">
       <div className="flex flex-col space-y-4">
-        <h2 className="text-2xl font-bold text-gray-900">Find Research Papers</h2>
+        <h2 className="text-2xl font-bold text-white bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-green-600">Find Research Papers</h2>
         <form onSubmit={handleSearch}>
           <div className="relative">
             <Input
               type="text"
-              className="w-full pl-12 pr-24 py-6 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full pl-12 pr-24 py-6 bg-gray-900 border border-gray-800 text-gray-100 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder="Search by title, author, keywords..."
               value={filter.query}
               onChange={handleInputChange}
@@ -148,7 +149,7 @@ export const SearchSection: FC<SearchSectionProps> = ({ initialFilter, onSearch 
             </div>
             <Button 
               type="submit"
-              className="absolute inset-y-0 right-0 px-4 bg-primary text-white rounded-r-lg hover:bg-indigo-700 transition"
+              className="absolute inset-y-0 right-0 px-4 bg-primary text-white rounded-r-lg hover:bg-green-600 transition"
             >
               Search
             </Button>

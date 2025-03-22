@@ -65,7 +65,7 @@ export const Pagination: FC<PaginationProps> = ({
         <Button
           variant="outline"
           size="icon"
-          className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+          className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-700 bg-gray-900 text-sm font-medium text-gray-400 hover:bg-gray-800"
           onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
         >
@@ -79,7 +79,7 @@ export const Pagination: FC<PaginationProps> = ({
             return (
               <div
                 key={`ellipsis-${index}`}
-                className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700"
+                className="relative inline-flex items-center px-4 py-2 border border-gray-700 bg-gray-900 text-sm font-medium text-gray-400"
               >
                 ...
               </div>
@@ -95,8 +95,8 @@ export const Pagination: FC<PaginationProps> = ({
               variant={isActive ? "default" : "outline"}
               className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                 isActive
-                  ? "bg-primary text-white"
-                  : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                  ? "bg-primary text-white border-green-700"
+                  : "border-gray-700 bg-gray-900 text-gray-300 hover:bg-gray-800"
               }`}
               onClick={() => onPageChange(pageNum)}
               disabled={isActive}
@@ -110,7 +110,7 @@ export const Pagination: FC<PaginationProps> = ({
         <Button
           variant="outline"
           size="icon"
-          className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+          className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-700 bg-gray-900 text-sm font-medium text-gray-400 hover:bg-gray-800"
           onClick={() => currentPage < totalPages && onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
         >

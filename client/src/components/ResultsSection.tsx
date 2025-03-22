@@ -43,17 +43,17 @@ export const ResultsSection: FC<ResultsSectionProps> = ({
   return (
     <section>
       <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center">
-        <h2 className="text-lg font-semibold text-gray-900 mb-2 sm:mb-0">
+        <h2 className="text-lg font-semibold text-white mb-2 sm:mb-0">
           {getTitle()}
         </h2>
         <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-500">{total} results</span>
-          <div className="border-l border-gray-300 h-6 mx-2"></div>
+          <span className="text-sm text-gray-400">{total} results</span>
+          <div className="border-l border-gray-700 h-6 mx-2"></div>
           <div className="flex items-center space-x-2">
             <Button
               size="sm"
               variant={viewMode === 'list' ? 'default' : 'outline'}
-              className="p-1.5"
+              className={`p-1.5 ${viewMode === 'list' ? 'bg-primary hover:bg-green-600' : 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700'}`}
               onClick={() => setViewMode('list')}
             >
               <List className="h-5 w-5" />
@@ -61,7 +61,7 @@ export const ResultsSection: FC<ResultsSectionProps> = ({
             <Button
               size="sm"
               variant={viewMode === 'grid' ? 'default' : 'outline'}
-              className="p-1.5"
+              className={`p-1.5 ${viewMode === 'grid' ? 'bg-primary hover:bg-green-600' : 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700'}`}
               onClick={() => setViewMode('grid')}
             >
               <LayoutGrid className="h-5 w-5" />
@@ -75,22 +75,22 @@ export const ResultsSection: FC<ResultsSectionProps> = ({
           viewMode === 'grid' ? 'grid-cols-1 lg:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'
         }`}>
           {Array(6).fill(0).map((_, index) => (
-            <div key={index} className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
-              <Skeleton className="h-4 w-1/4 mb-2" />
-              <Skeleton className="h-6 w-3/4 mb-3" />
-              <Skeleton className="h-4 w-1/2 mb-3" />
-              <Skeleton className="h-4 w-full mb-2" />
-              <Skeleton className="h-4 w-full mb-2" />
-              <Skeleton className="h-4 w-3/4 mb-4" />
+            <div key={index} className="bg-gray-900 rounded-lg border border-gray-800 p-5 shadow-sm">
+              <Skeleton className="h-4 w-1/4 mb-2 bg-gray-800" />
+              <Skeleton className="h-6 w-3/4 mb-3 bg-gray-800" />
+              <Skeleton className="h-4 w-1/2 mb-3 bg-gray-800" />
+              <Skeleton className="h-4 w-full mb-2 bg-gray-800" />
+              <Skeleton className="h-4 w-full mb-2 bg-gray-800" />
+              <Skeleton className="h-4 w-3/4 mb-4 bg-gray-800" />
               <div className="flex justify-between">
-                <Skeleton className="h-4 w-1/4" />
-                <Skeleton className="h-8 w-1/4" />
+                <Skeleton className="h-4 w-1/4 bg-gray-800" />
+                <Skeleton className="h-8 w-1/4 bg-gray-800" />
               </div>
             </div>
           ))}
         </div>
       ) : error ? (
-        <Alert variant="destructive">
+        <Alert variant="destructive" className="bg-gray-900 border-red-900 text-red-400">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>
@@ -98,16 +98,16 @@ export const ResultsSection: FC<ResultsSectionProps> = ({
           </AlertDescription>
         </Alert>
       ) : papers.length === 0 ? (
-        <div className="text-center py-16 bg-gray-50 rounded-lg border border-gray-200">
-          <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No papers found</h3>
-          <p className="text-gray-500 mb-6 max-w-md mx-auto">
+        <div className="text-center py-16 bg-gray-900 rounded-lg border border-gray-800">
+          <Search className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-white mb-2">No papers found</h3>
+          <p className="text-gray-400 mb-6 max-w-md mx-auto">
             Try adjusting your search filters to find more research papers.
           </p>
           <Button 
             variant="outline" 
             onClick={() => onPageChange(1)}
-            className="mx-auto"
+            className="mx-auto border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
           >
             Clear Filters
           </Button>
