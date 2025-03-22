@@ -102,7 +102,18 @@ export class MemStorage implements IStorage {
   async createPaper(insertPaper: InsertPaper): Promise<Paper> {
     const id = this.paperId++;
     const now = new Date();
-    const paper: Paper = { ...insertPaper, id, createdAt: now };
+    // Handle null values explicitly for type safety
+    const paper: Paper = { 
+      ...insertPaper, 
+      id, 
+      createdAt: now,
+      doi: insertPaper.doi || null,
+      pdfUrl: insertPaper.pdfUrl || null,
+      journal: insertPaper.journal || null,
+      pageCount: insertPaper.pageCount || null,
+      viewCount: insertPaper.viewCount || null,
+      citation_count: insertPaper.citation_count || null
+    };
     this.papers.set(id, paper);
     return paper;
   }
@@ -254,7 +265,16 @@ export class MemStorage implements IStorage {
   async createSummary(insertSummary: InsertSummary): Promise<Summary> {
     const id = this.summaryId++;
     const now = new Date();
-    const summary: Summary = { ...insertSummary, id, createdAt: now, updatedAt: now };
+    // Handle null values explicitly for type safety
+    const summary: Summary = { 
+      ...insertSummary, 
+      id, 
+      createdAt: now, 
+      updatedAt: now,
+      shortSummary: insertSummary.shortSummary || null,
+      mediumSummary: insertSummary.mediumSummary || null,
+      detailedSummary: insertSummary.detailedSummary || null
+    };
     this.summaries.set(id, summary);
     return summary;
   }
@@ -287,7 +307,14 @@ export class MemStorage implements IStorage {
   async saveRecentSearch(insertSearch: InsertRecentSearch): Promise<RecentSearch> {
     const id = this.searchId++;
     const now = new Date();
-    const search: RecentSearch = { ...insertSearch, id, createdAt: now };
+    // Handle null values explicitly for type safety
+    const search: RecentSearch = { 
+      ...insertSearch, 
+      id, 
+      createdAt: now,
+      // Ensure filters is always defined (even if empty)
+      filters: insertSearch.filters || {}
+    };
     this.recentSearches.set(id, search);
     return search;
   }

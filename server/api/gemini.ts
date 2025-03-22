@@ -12,12 +12,123 @@ interface GeneratedSummary {
  */
 export async function generateSummary(paper: Paper): Promise<GeneratedSummary> {
   try {
-    // In a real implementation, you would use the Gemini API:
-    // const apiKey = process.env.GEMINI_API_KEY || "";
-    // const baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent";
+    const apiKey = process.env.GEMINI_API_KEY;
     
-    // Since we don't have a real API key, we'll generate summaries locally
-    // based on the paper information
+    // If we have an API key, use the actual Gemini API
+    if (apiKey) {
+      console.log("Using Gemini API for summary generation");
+      
+      try {
+        // Try to use the Gemini API
+        const baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent";
+        
+        // Generate short summary (bullet points)
+        const shortSummaryPrompt = `Create a concise bullet-point summary (5-6 points max) of the following research paper:
+        
+        Title: ${paper.title}
+        Authors: ${paper.authors.join(", ")}
+        Domain: ${paper.domain}
+        Abstract: ${paper.abstract}
+        
+        Format your response as bullet points starting with • and focus on the key findings, methodology, and significance.`;
+        
+        // Generate medium summary
+        const mediumSummaryPrompt = `Create a medium-length summary (3-4 paragraphs) of the following research paper:
+        
+        Title: ${paper.title}
+        Authors: ${paper.authors.join(", ")}
+        Domain: ${paper.domain}
+        Abstract: ${paper.abstract}
+        
+        Focus on explaining the research problem, methodology, key findings, and implications. Use clear language suitable for educated non-specialists.`;
+        
+        // Generate detailed summary
+        const detailedSummaryPrompt = `Create a comprehensive detailed summary of the following research paper:
+        
+        Title: ${paper.title}
+        Authors: ${paper.authors.join(", ")}
+        Domain: ${paper.domain}
+        Journal: ${paper.journal || "N/A"}
+        Publication Date: ${new Date(paper.publishedDate).toISOString().split('T')[0]}
+        Abstract: ${paper.abstract}
+        
+        The summary should include:
+        1. Background and context for the research
+        2. The problem statement and research objectives
+        3. The methodology used
+        4. Key findings and results
+        5. Theoretical and practical implications
+        6. Limitations of the study
+        7. Future research directions
+        
+        Organize the text in well-structured paragraphs with a clear flow of ideas. Use language that is appropriate for a knowledgeable audience in this field.`;
+        
+        // Make parallel requests to the API for all three summaries
+        const [shortSummaryResponse, mediumSummaryResponse, detailedSummaryResponse] = await Promise.all([
+          fetch(`${baseUrl}?key=${apiKey}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: shortSummaryPrompt }] }],
+              generationConfig: {
+                temperature: 0.2,
+                maxOutputTokens: 1024,
+              }
+            })
+          }),
+          fetch(`${baseUrl}?key=${apiKey}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: mediumSummaryPrompt }] }],
+              generationConfig: {
+                temperature: 0.3,
+                maxOutputTokens: 2048,
+              }
+            })
+          }),
+          fetch(`${baseUrl}?key=${apiKey}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: detailedSummaryPrompt }] }],
+              generationConfig: {
+                temperature: 0.4,
+                maxOutputTokens: 4096,
+              }
+            })
+          })
+        ]);
+        
+        // Process responses
+        const shortData = await shortSummaryResponse.json();
+        const mediumData = await mediumSummaryResponse.json();
+        const detailedData = await detailedSummaryResponse.json();
+        
+        // Extract the text from the responses
+        const shortSummary = shortData.candidates?.[0]?.content?.parts?.[0]?.text || 
+          "Unable to generate a short summary. Please try again later.";
+        
+        const mediumSummary = mediumData.candidates?.[0]?.content?.parts?.[0]?.text || 
+          "Unable to generate a medium summary. Please try again later.";
+        
+        const detailedSummary = detailedData.candidates?.[0]?.content?.parts?.[0]?.text || 
+          "Unable to generate a detailed summary. Please try again later.";
+        
+        return {
+          shortSummary,
+          mediumSummary,
+          detailedSummary
+        };
+      } catch (apiError) {
+        console.error("Error calling Gemini API:", apiError);
+        console.log("Falling back to local summary generation");
+        // Fall back to local generation if API call fails
+      }
+    }
+    
+    // If no API key or API call failed, generate summaries locally
+    console.log("Generating summaries locally");
     await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API delay
     
     // Generate short summary (bullet points)
@@ -100,8 +211,9 @@ function generateDetailedSummary(paper: Paper): string {
   
   const domainContext = getDomainContext(paper.domain);
   
-  const citationContext = paper.citation_count > 0
-    ? `This work has been cited ${paper.citation_count} times, indicating its significance in the field.`
+  const citationCount = paper.citation_count || 0;
+  const citationContext = citationCount > 0
+    ? `This work has been cited ${citationCount} times, indicating its significance in the field.`
     : "";
   
   return `
@@ -156,7 +268,9 @@ function extractKeyPhrases(text: string): string[] {
   }
   
   // Limit to 5 bullet points maximum, prioritizing different insights
-  return [...new Set(phrases)].slice(0, 5);
+  // Convert Set to Array more explicitly to avoid TS issues
+  const uniquePhrases = Array.from(new Set(phrases));
+  return uniquePhrases.slice(0, 5);
 }
 
 /**
