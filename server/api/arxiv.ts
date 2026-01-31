@@ -38,7 +38,6 @@ export async function fetchArxivPapers(filter: SearchFilter): Promise<InsertPape
       
       const category = domainToCategory[filter.domain];
       if (category) {
-        // If we have a query already, add the category filter
         if (filter.query) {
           params.append("cat", category);
         } else {
