@@ -91,12 +91,42 @@ export const SummaryContent: FC<SummaryContentProps> = ({
     );
   }
 
+  // Helper function for simple markdown rendering
+  const renderMarkdown = (text: string) => {
+    // Split by newlines to handle paragraphs
+    return text.split('\n\n').map((paragraph, index) => {
+      // Bold text handling (**text**)
+      const parts = paragraph.split(/(\*\*.*?\*\*)/g);
+      
+      return (
+        <div key={index} className="mb-3 text-gray-300 leading-relaxed">
+          {parts.map((part, i) => {
+            if (part.startsWith('**') && part.endsWith('**')) {
+              // Remove ** and render as strong
+              return <strong key={i} className="text-white font-semibold">{part.slice(2, -2)}</strong>;
+            } else if (part.startsWith('# ')) {
+              // Header 1
+              return <h3 key={i} className="text-lg font-bold text-white mb-2 mt-4">{part.slice(2)}</h3>;
+            } else if (part.startsWith('## ')) {
+              // Header 2
+              return <h4 key={i} className="text-md font-semibold text-blue-400 mb-2 mt-3">{part.slice(3)}</h4>;
+            } else if (part.trim().startsWith('- ')) {
+              // List items
+               return <li key={i} className="ml-4 list-disc text-gray-300">{part.trim().slice(2)}</li>;
+            }
+            return part;
+          })}
+        </div>
+      );
+    });
+  };
+
   // Detailed Summary
   if (activeTab === "detailed") {
     return (
-      <div className="text-sm text-gray-300">
+      <div className="text-sm">
         {summary.detailedSummary ? (
-          <div className="whitespace-pre-line">{summary.detailedSummary}</div>
+          <div>{renderMarkdown(summary.detailedSummary)}</div>
         ) : (
           <p className="text-gray-500">Detailed summary not available.</p>
         )}

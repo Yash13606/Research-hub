@@ -98,7 +98,7 @@ export async function fetchScienceDirectPapers(filter: SearchFilter): Promise<In
     } else if (filter.sortBy === "date_asc") {
       papers.sort((a, b) => a.publishedDate.getTime() - b.publishedDate.getTime());
     } else if (filter.sortBy === "citations") {
-      papers.sort((a, b) => b.citation_count - a.citation_count);
+      papers.sort((a, b) => (b.citation_count || 0) - (a.citation_count || 0));
     }
     
     return papers;

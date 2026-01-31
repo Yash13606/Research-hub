@@ -37,6 +37,14 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   email: text("email").notNull().unique(),
+  role: text("role").default("student"),
+  profile: json("profile").$type<{
+    institution?: string;
+    field?: string;
+    bio?: string;
+    skills?: string[];
+    papersRead?: number;
+  }>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -147,3 +155,72 @@ export type RecentSearch = typeof recentSearches.$inferSelect;
 export type InsertRecentSearch = z.infer<typeof insertRecentSearchSchema>;
 
 export type SearchFilter = z.infer<typeof searchFilterSchema>;
+
+// --- COMMUNITY SYSTEM SCHEMA ---
+
+// Extended User Fields (Note: We can't easily alter the existing table export without breaking imports, 
+// so we'll treat 'role' and 'profile' as fields that would exist in the real DB. 
+// For this 'pgTable' definition, we'll add them to the object.)
+
+
+// Research Opportunities (Jobs/Positions)
+export const opportunities = pgTable("research_opportunities", {
+  id: serial("id").primaryKey(),
+  professorId: integer("professor_id").notNull(), // references users.id
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  institution: text("institution").notNull(),
+  field: text("field").notNull(),
+  requiredSkills: text("required_skills").array(),
+  duration: text("duration"),
+  isRemote: boolean("is_remote").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Applications to Opportunities
+export const applications = pgTable("applications", {
+  id: serial("id").primaryKey(),
+  opportunityId: integer("opportunity_id").notNull(), // references opportunities.id
+  studentId: integer("student_id").notNull(), // references users.id
+  status: text("status").default("pending"), // 'pending' | 'accepted' | 'rejected'
+  message: text("message"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Community Posts (Discussions)
+export const posts = pgTable("community_posts", {
+  id: serial("id").primaryKey(),
+  authorId: integer("author_id").notNull(), // references users.id
+  domain: text("domain").notNull(), // e.g. "Artificial Intelligence"
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  tags: text("tags").array(),
+  likes: integer("likes").default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertOpportunitySchema = createInsertSchema(opportunities).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertApplicationSchema = createInsertSchema(applications).omit({
+  id: true,
+  createdAt: true,
+  status: true,
+});
+
+export const insertPostSchema = createInsertSchema(posts).omit({
+  id: true,
+  createdAt: true,
+  likes: true,
+});
+
+export type Opportunity = typeof opportunities.$inferSelect;
+export type InsertOpportunity = z.infer<typeof insertOpportunitySchema>;
+
+export type Application = typeof applications.$inferSelect;
+export type InsertApplication = z.infer<typeof insertApplicationSchema>;
+
+export type Post = typeof posts.$inferSelect;
+export type InsertPost = z.infer<typeof insertPostSchema>;

@@ -12,7 +12,7 @@ interface GeneratedSummary {
  */
 export async function generateSummary(paper: Paper): Promise<GeneratedSummary> {
   try {
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY || "AIzaSyCO5l7a_hnkecEMwdmZlcnkhTukfGr91c0";
     
     // If we have an API key, use the actual Gemini API
     if (apiKey) {

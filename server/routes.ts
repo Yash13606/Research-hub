@@ -1,7 +1,8 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { searchFilterSchema, insertSavedPaperSchema } from "@shared/schema";
+import { searchFilterSchema, insertSavedPaperSchema, insertOpportunitySchema, insertPostSchema } from "@shared/schema";
+
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { fetchArxivPapers } from "./api/arxiv";
@@ -394,6 +395,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (err) {
       return handleValidationError(err, res);
     }
+  });
+
+  // --- COMMUNITY ROUTES ---
+
+  // Get all opportunities
+  app.get("/api/opportunities", async (_req: Request, res: Response) => {
+    try {
+      const opportunities = await storage.getOpportunities();
+      return res.json(opportunities);
+    } catch (err) {
+      return handleValidationError(err, res);
+    }
+  });
+
+  // Create an opportunity
+  app.post("/api/opportunities", async (req: Request, res: Response) => {
+    try {
+      const opportunity = await storage.createOpportunity(insertOpportunitySchema.parse(req.body));
+      return res.status(201).json(opportunity);
+    } catch (err) {
+      return handleValidationError(err, res);
+    }
+  });
+
+  // Get specific opportunity
+  app.get("/api/opportunities/:id", async (req: Request, res: Response) => {
+    try {
+        const id = parseInt(req.params.id);
+        const opportunity = await storage.getOpportunity(id);
+        if(!opportunity) return res.status(404).json({ message: "Opportunity not found" });
+        return res.json(opportunity);
+    } catch (err) {
+        return handleValidationError(err, res);
+    }
+  });
+
+  // Apply to an opportunity
+  app.post("/api/opportunities/:id/apply", async (req: Request, res: Response) => {
+    try {
+        const opportunityId = parseInt(req.params.id);
+        const { studentId, message } = req.body;
+        
+        // Basic validation (in a real app, middleware handles auth)
+        if (!studentId) return res.status(400).json({ message: "Student ID required" });
+
+        const application = await storage.createApplication({
+            opportunityId,
+            studentId,
+            message: message || "I am interested in this opportunity."
+        });
+        return res.status(201).json(application);
+    } catch (err) {
+        return handleValidationError(err, res);
+    }
+  });
+
+  // Get applications for a specific opportunity (Professor view)
+  app.get("/api/opportunities/:id/applications", async (req: Request, res: Response) => {
+      try {
+          const id = parseInt(req.params.id);
+          const applications = await storage.getApplicationsByOpportunity(id);
+          return res.json(applications);
+      } catch (err) {
+          return handleValidationError(err, res);
+      }
+  });
+
+  // Get applications for a user (Student view)
+  app.get("/api/users/:userId/applications", async (req: Request, res: Response) => {
+      try {
+          const userId = parseInt(req.params.userId);
+          const applications = await storage.getApplicationsByUser(userId);
+          return res.json(applications);
+      } catch (err) {
+          return handleValidationError(err, res);
+      }
+  });
+
+  // Community Posts
+  app.get("/api/community/posts", async (_req: Request, res: Response) => {
+      try {
+          const posts = await storage.getPosts();
+          return res.json(posts);
+      } catch (err) {
+          return handleValidationError(err, res);
+      }
+  });
+
+  app.post("/api/community/posts", async (req: Request, res: Response) => {
+      try {
+          const post = await storage.createPost(insertPostSchema.parse(req.body));
+          return res.status(201).json(post);
+      } catch (err) {
+          return handleValidationError(err, res);
+      }
+  });
+
+  // Update User Profile
+  app.patch("/api/users/:id/profile", async (req: Request, res: Response) => {
+      try {
+          const id = parseInt(req.params.id);
+          const updates = req.body; // Expects { role?, profile? }
+          const updatedUser = await storage.updateUser(id, updates);
+          return res.json(updatedUser);
+      } catch (err) {
+          return handleValidationError(err, res);
+      }
   });
 
   // Create and return HTTP server

@@ -24,6 +24,16 @@ export function usePapers(filter: SearchFilter) {
   
   return useQuery<PapersResponse>({
     queryKey: [`/api/papers${queryString ? `?${queryString}` : ''}`],
+    queryFn: async () => {
+      // Simulate delay for realistic search feel
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const res = await fetch(`/api/papers${queryString ? `?${queryString}` : ''}`);
+      if (!res.ok) {
+        throw new Error('Failed to fetch papers');
+      }
+      return res.json();
+    },
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
   });

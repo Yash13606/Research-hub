@@ -1,34 +1,64 @@
-import { FC, useState, FormEvent, useEffect, useCallback } from "react";
+import { FC, useState, FormEvent, useEffect, useRef } from "react";
 import { useLocation, useRoute } from "wouter";
-import { Search } from "lucide-react";
+import { Search, X, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { AdvancedFilters } from "./filters/AdvancedFilters";
 import { SearchFilter } from "@/lib/types";
 import { PLATFORMS, DOMAINS } from "@/lib/constants";
-import { debounce } from "@/lib/utils";
+
+import { useAppState } from "@/contexts/AppStateContext";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface SearchSectionProps {
-  initialFilter?: SearchFilter;
+  initialFilter?: SearchFilter; // Kept for compatibility but we'll prefer global state
   onSearch: (filter: SearchFilter) => void;
+  isLoading?: boolean;
 }
 
-export const SearchSection: FC<SearchSectionProps> = ({ initialFilter, onSearch }) => {
+export const SearchSection: FC<SearchSectionProps> = ({ initialFilter, onSearch, isLoading = false }) => {
   const [location, setLocation] = useLocation();
   const [, params] = useRoute("/:tab");
+  const { 
+    searchQuery, setSearchQuery, 
+    filterOptions, setFilterOptions, resetFilters,
+    selectedDomain, setSelectedDomain,
+    incrementTotalSearches
+  } = useAppState();
   
   const [isAdvancedExpanded, setIsAdvancedExpanded] = useState(false);
-  const [filter, setFilter] = useState<SearchFilter>(initialFilter || {
-    query: "",
-    platform: "",
-    domain: "",
-    author: "",
-    journal: "",
-    dateRange: "",
-    sortBy: "relevance",
-    page: 1,
+  const [localQuery, setLocalQuery] = useState(searchQuery);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Focus search input on custom event (e.g. from keyboard shortcut)
+  useEffect(() => {
+    const handleFocusSearch = () => {
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+      }
+    };
+    
+    window.addEventListener('focus-search', handleFocusSearch);
+    return () => window.removeEventListener('focus-search', handleFocusSearch);
+  }, []);
+
+  // Sync local query with global state
+  useEffect(() => {
+    setLocalQuery(searchQuery);
+  }, [searchQuery]);
+
+  // Construct current filter object from global state
+  const currentFilter: SearchFilter = {
+    query: searchQuery,
+    platform: filterOptions.platform,
+    domain: selectedDomain || filterOptions.domain,
+    author: filterOptions.author,
+    journal: filterOptions.journal,
+    dateRange: filterOptions.dateRange as any,
+    sortBy: filterOptions.sortBy as any,
+    page: 1, // Reset to page 1 on filter change
     limit: 10
-  });
+  };
   
   useEffect(() => {
     // Update the filter when the location changes (e.g., direct link or back button)
@@ -46,7 +76,25 @@ export const SearchSection: FC<SearchSectionProps> = ({ initialFilter, onSearch 
     
     // Only update if there are actual filter params
     if (Object.keys(urlFilter).length > 0) {
-      setFilter(prev => ({ ...prev, ...urlFilter }));
+      if (urlFilter.query !== undefined) {
+        setSearchQuery(urlFilter.query);
+        setLocalQuery(urlFilter.query);
+      }
+      
+      const newOptions: any = {};
+      if (urlFilter.platform !== undefined) newOptions.platform = urlFilter.platform;
+      if (urlFilter.author !== undefined) newOptions.author = urlFilter.author;
+      if (urlFilter.journal !== undefined) newOptions.journal = urlFilter.journal;
+      if (urlFilter.dateRange !== undefined) newOptions.dateRange = urlFilter.dateRange;
+      if (urlFilter.sortBy !== undefined) newOptions.sortBy = urlFilter.sortBy;
+      
+      if (Object.keys(newOptions).length > 0) {
+        setFilterOptions(newOptions);
+      }
+      
+      if (urlFilter.domain !== undefined) {
+        setSelectedDomain(urlFilter.domain);
+      }
       
       // Expand advanced filters if any of the advanced options are set
       if (urlFilter.platform || urlFilter.domain || urlFilter.author || 
@@ -55,7 +103,7 @@ export const SearchSection: FC<SearchSectionProps> = ({ initialFilter, onSearch 
       }
       
       // Trigger search with the URL parameters
-      onSearch({ ...filter, ...urlFilter });
+      onSearch({ ...currentFilter, ...urlFilter });
     }
   }, [location]);
   
@@ -65,83 +113,87 @@ export const SearchSection: FC<SearchSectionProps> = ({ initialFilter, onSearch 
     if (initialFilter) {
       updateUrl();
     }
-  }, [filter]);
+  }, [searchQuery, filterOptions, selectedDomain]);
 
   // Update URL without causing a navigation
   const updateUrl = () => {
     const searchParams = new URLSearchParams();
     
-    if (filter.query) searchParams.set("query", filter.query);
-    if (filter.platform) searchParams.set("platform", filter.platform);
-    if (filter.domain) searchParams.set("domain", filter.domain);
-    if (filter.author) searchParams.set("author", filter.author);
-    if (filter.journal) searchParams.set("journal", filter.journal);
-    if (filter.dateRange) searchParams.set("dateRange", filter.dateRange);
-    if (filter.sortBy && filter.sortBy !== "relevance") searchParams.set("sortBy", filter.sortBy);
-    if (filter.page && filter.page > 1) searchParams.set("page", filter.page.toString());
+    if (searchQuery) searchParams.set("query", searchQuery);
+    if (filterOptions.platform) searchParams.set("platform", filterOptions.platform);
+    if (selectedDomain) searchParams.set("domain", selectedDomain);
+    else if (filterOptions.domain) searchParams.set("domain", filterOptions.domain);
+    
+    if (filterOptions.author) searchParams.set("author", filterOptions.author);
+    if (filterOptions.journal) searchParams.set("journal", filterOptions.journal);
+    if (filterOptions.dateRange) searchParams.set("dateRange", filterOptions.dateRange);
+    if (filterOptions.sortBy && filterOptions.sortBy !== "relevance") searchParams.set("sortBy", filterOptions.sortBy);
+    
+    // Page is reset to 1 on new searches usually, so we don't always need to sync it to URL unless it's > 1
+    // For now simplistic approach
     
     const queryString = searchParams.toString();
     const newUrl = params?.tab ? `/${params.tab}${queryString ? `?${queryString}` : ''}` : 
                                   `/${queryString ? `?${queryString}` : ''}`;
     
-    // Only update the URL if it's different
+    // Only update the URL if it's different and valid
     if (window.location.pathname + window.location.search !== newUrl) {
       window.history.replaceState(null, '', newUrl);
     }
   };
-  
+
   const handleSearch = (e: FormEvent) => {
     e.preventDefault();
-    // Reset to page 1 when search is triggered
-    const newFilter = { ...filter, page: 1 };
-    setFilter(newFilter);
-    onSearch(newFilter);
+    setSearchQuery(localQuery);
+    incrementTotalSearches();
+    onSearch({ ...currentFilter, query: localQuery });
   };
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilter({ ...filter, query: e.target.value });
+    setLocalQuery(e.target.value);
   };
   
-  const debouncedSearch = useCallback(
-    debounce((newFilter: SearchFilter) => {
-      onSearch(newFilter);
-    }, 300),
-    []
-  );
-  
   const handleFilterChange = (newFilterValues: Partial<SearchFilter>) => {
-    const newFilter = { ...filter, ...newFilterValues, page: 1 };
-    setFilter(newFilter);
-    debouncedSearch(newFilter);
+    // Update global state
+    if (newFilterValues.platform !== undefined) setFilterOptions({ platform: newFilterValues.platform });
+    if (newFilterValues.domain !== undefined) setSelectedDomain(newFilterValues.domain);
+    if (newFilterValues.author !== undefined) setFilterOptions({ author: newFilterValues.author });
+    if (newFilterValues.journal !== undefined) setFilterOptions({ journal: newFilterValues.journal });
+    if (newFilterValues.dateRange !== undefined) setFilterOptions({ dateRange: newFilterValues.dateRange });
+    if (newFilterValues.sortBy !== undefined) setFilterOptions({ sortBy: newFilterValues.sortBy });
+    
+    // Trigger search
+    onSearch({ ...currentFilter, ...newFilterValues });
   };
   
   const handleResetFilters = () => {
-    const resetFilter: SearchFilter = {
-      ...filter,
-      platform: "",
+    resetFilters();
+    setLocalQuery("");
+    setSearchQuery("");
+    onSearch({ 
+      ...currentFilter, 
+      query: "", 
+      platform: "", 
       domain: "",
-      author: "",
-      journal: "",
-      dateRange: "",
-      sortBy: "relevance",
-      page: 1,
-      limit: 10
-    };
-    setFilter(resetFilter);
-    onSearch(resetFilter);
+      author: "", 
+      journal: "", 
+      dateRange: "", 
+      sortBy: "relevance" 
+    });
   };
   
   return (
     <section className="mb-8">
       <div className="flex flex-col space-y-4">
-        <h2 className="text-2xl font-bold text-white bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-green-600">Find Research Papers</h2>
+        <h2 className="text-2xl font-bold text-white bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-600">Find Research Papers</h2>
         <form onSubmit={handleSearch}>
-          <div className="relative">
+          <div className="relative group">
             <Input
+              ref={searchInputRef}
               type="text"
-              className="w-full pl-12 pr-24 py-6 bg-gray-900 border border-gray-800 text-gray-100 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full pl-12 pr-24 py-6 bg-[#0A1A2F] border border-gray-700 text-white rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 group-hover:border-blue-500/50"
               placeholder="Search by title, author, keywords..."
-              value={filter.query}
+              value={localQuery}
               onChange={handleInputChange}
             />
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -149,7 +201,7 @@ export const SearchSection: FC<SearchSectionProps> = ({ initialFilter, onSearch 
             </div>
             <Button 
               type="submit"
-              className="absolute inset-y-0 right-0 px-4 bg-primary text-white rounded-r-lg hover:bg-green-600 transition"
+              className="absolute inset-y-0 right-0 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-r-lg hover:from-blue-700 hover:to-indigo-700 transition duration-200"
             >
               Search
             </Button>
@@ -158,12 +210,12 @@ export const SearchSection: FC<SearchSectionProps> = ({ initialFilter, onSearch 
         
         {/* Advanced Filters */}
         <AdvancedFilters
-          filter={filter}
+          filter={currentFilter}
           isExpanded={isAdvancedExpanded}
           onToggleExpand={() => setIsAdvancedExpanded(!isAdvancedExpanded)}
           onFilterChange={handleFilterChange}
           onResetFilters={handleResetFilters}
-          onApplyFilters={() => onSearch(filter)}
+          onApplyFilters={() => onSearch(currentFilter)}
           platforms={PLATFORMS}
           domains={DOMAINS}
         />

@@ -137,7 +137,7 @@ function determineDomainFromSubjects(subjects: string[]): string {
     "biology": "Biology",
     "genetics": "Biology",
     "microbiology": "Biology",
-    "ecology": "Biology",
+    // "ecology": "Biology", // Removed duplicate
     
     // Mathematics related
     "mathematics": "Mathematics",
@@ -180,7 +180,6 @@ function determineDomainFromSubjects(subjects: string[]): string {
     
     // Astronomy related
     "astronomy": "Astronomy",
-    "astrophysics": "Astronomy",
     "cosmology": "Astronomy",
   };
   

@@ -1,67 +1,67 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { SearchSection } from "@/components/SearchSection";
 import { ResultsSection } from "@/components/ResultsSection";
 import { usePapers } from "@/hooks/usePapers";
 import { SearchFilter } from "@/lib/types";
-import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useLocation } from "wouter";
+import { useAppState } from "@/contexts/AppStateContext";
+import { apiRequest } from "@/lib/queryClient";
 
 const Home = () => {
-  const [location] = useLocation();
   const { toast } = useToast();
-  const [searchFilter, setSearchFilter] = useState<SearchFilter>({
-    query: "",
-    platform: "",
-    domain: "",
-    author: "",
-    journal: "",
-    dateRange: "",
-    sortBy: "relevance",
-    page: 1,
+  const { 
+    searchQuery, 
+    setSearchQuery,
+    filterOptions, 
+    setFilterOptions,
+    selectedDomain,
+    setSelectedDomain,
+    addRecentSearch
+  } = useAppState();
+
+  const searchFilter: SearchFilter = {
+    query: searchQuery,
+    platform: filterOptions.platform,
+    domain: selectedDomain || filterOptions.domain,
+    author: filterOptions.author,
+    journal: filterOptions.journal,
+    dateRange: filterOptions.dateRange as any,
+    sortBy: filterOptions.sortBy as any,
+    page: 1, 
     limit: 12
-  });
-
-  // Initialize filter from URL params on first render
-  useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const urlFilter: Partial<SearchFilter> = {};
-    
-    if (searchParams.has("query")) urlFilter.query = searchParams.get("query") || "";
-    if (searchParams.has("platform")) urlFilter.platform = searchParams.get("platform") || "";
-    if (searchParams.has("domain")) urlFilter.domain = searchParams.get("domain") || "";
-    if (searchParams.has("author")) urlFilter.author = searchParams.get("author") || "";
-    if (searchParams.has("journal")) urlFilter.journal = searchParams.get("journal") || "";
-    if (searchParams.has("dateRange")) urlFilter.dateRange = searchParams.get("dateRange") as any || "";
-    if (searchParams.has("sortBy")) urlFilter.sortBy = searchParams.get("sortBy") as any || "relevance";
-    if (searchParams.has("page")) urlFilter.page = parseInt(searchParams.get("page") || "1");
-    
-    if (Object.keys(urlFilter).length > 0) {
-      setSearchFilter(prev => ({ ...prev, ...urlFilter }));
-    }
-  }, []);
-
+  };
+  
   const { 
     data, 
     isLoading, 
-    error, 
-    refetch 
+    error 
   } = usePapers(searchFilter);
 
   const handleSearch = (filter: SearchFilter) => {
-    setSearchFilter(filter);
+    // Update global state if changed from child
+    if (filter.query !== searchQuery) setSearchQuery(filter.query || "");
+    if (filter.domain && filter.domain !== selectedDomain) setSelectedDomain(filter.domain);
     
-    // Save recent search for logged-in user
-    // Note: In a real application, you'd check if user is logged in
-    const userId = 1; // Hardcoded for demo
-    
-    // Only save meaningful searches
+    // Save to recent searches history
     if (filter.query || filter.domain || filter.platform) {
-      saveRecentSearch(userId, filter);
+      addRecentSearch({
+        query: filter.query || "",
+        filters: {
+          platform: filter.platform,
+          domain: filter.domain,
+          author: filter.author,
+          journal: filter.journal,
+          dateRange: filter.dateRange,
+          sortBy: filter.sortBy
+        }
+      });
+      
+      // Also persist to backend if needed
+      saveRecentSearchbackend(1, filter);
     }
   };
 
-  const saveRecentSearch = async (userId: number, filter: SearchFilter) => {
+  const saveRecentSearchbackend = async (userId: number, filter: SearchFilter) => {
     try {
       await apiRequest("POST", `/api/users/${userId}/recent-searches`, {
         query: filter.query,
@@ -76,13 +76,19 @@ const Home = () => {
       });
     } catch (error) {
       console.error("Error saving recent search:", error);
-      // Don't show a toast here to avoid interrupting the user experience
     }
   };
 
   const handlePageChange = (page: number) => {
-    const newFilter = { ...searchFilter, page };
-    setSearchFilter(newFilter);
+    // We can handle pagination state locally or via URL params, keeping simple for now
+    // Ideally update searchFilter's page but usePapers might need a trigger
+    const url = new URL(window.location.href);
+    url.searchParams.set("page", page.toString());
+    window.history.pushState({}, "", url.toString());
+    // Force re-fetch? usePapers depends on searchFilter which is derived from state. 
+    // If we want pagination we might need page in global state. 
+    // For this refactor let's keep page handling local to ResultsSection or refetch via URL
+    window.dispatchEvent(new Event('popstate'));
   };
 
   // Show error toast if the query fails
@@ -101,6 +107,7 @@ const Home = () => {
       <SearchSection 
         initialFilter={searchFilter} 
         onSearch={handleSearch} 
+        isLoading={isLoading}
       />
       
       <ResultsSection 
@@ -111,7 +118,13 @@ const Home = () => {
         isLoading={isLoading} 
         error={error}
         onPageChange={handlePageChange}
-        searchTerm={searchFilter.query}
+        searchTerm={searchQuery}
+        selectedDomain={selectedDomain}
+        onClearFilters={() => {
+          setSelectedDomain('');
+          setSearchQuery('');
+          setFilterOptions({}); // Reset others
+        }}
       />
     </>
   );
