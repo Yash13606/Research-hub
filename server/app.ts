@@ -1,4 +1,5 @@
-import express, { type Request, Response, NextFunction } from "express";
+import express, { type Request, Response, NextFunction, type Express } from "express";
+import { type Server } from "http";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
@@ -36,14 +37,24 @@ app.use((req, res, next) => {
   next();
 });
 
-import { createApp } from "./app";
+export async function createApp(): Promise<{ app: Express; server: Server }> {
+  const server = await registerRoutes(app);
 
-createApp().then(({ server }: { server: any }) => {
-  const port = 5000;
-  server.listen(port, "0.0.0.0", () => {
-    log(`serving on port ${port}`);
+  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
+
+    res.status(status).json({ message });
+    throw err;
   });
-}).catch((err: Error) => {
-  console.error("Failed to start server:", err);
-  process.exit(1);
-});
+
+  if (app.get("env") === "development") {
+    await setupVite(app, server);
+  } else {
+    serveStatic(app);
+  }
+  
+  return { app, server };
+}
+
+export default app;
