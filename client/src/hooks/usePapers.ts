@@ -28,7 +28,8 @@ export function usePapers(filter: SearchFilter) {
       // Simulate delay for realistic search feel
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      const res = await fetch(`/api/papers${queryString ? `?${queryString}` : ''}`);
+      const API_BASE_URL = import.meta.env.VITE_API_URL || "";
+      const res = await fetch(`${API_BASE_URL}/api/papers${queryString ? `?${queryString}` : ''}`);
       if (!res.ok) {
         throw new Error('Failed to fetch papers');
       }
