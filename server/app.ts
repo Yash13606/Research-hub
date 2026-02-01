@@ -7,7 +7,10 @@ import cors from "cors";
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cors());
+app.use(cors({
+  origin: true, // Reflect the request origin
+  credentials: true // Allow cookies/headers
+}));
 
 app.use((req, res, next) => {
   const start = Date.now();
