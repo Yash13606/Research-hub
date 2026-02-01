@@ -26,12 +26,12 @@ export default function Community() {
   const [activeTab, setActiveTab] = useState("opportunities");
 
   // Fetch opportunities
-  const { data: opportunities, isLoading: loadingOpportunities } = useQuery<Opportunity[]>({ 
+  const { data: opportunities, isLoading: loadingOpportunities, isError: errorOpportunities } = useQuery<Opportunity[]>({ 
     queryKey: ['/api/opportunities'] 
   });
 
   // Fetch posts
-  const { data: posts, isLoading: loadingPosts } = useQuery<Post[]>({ 
+  const { data: posts, isLoading: loadingPosts, isError: errorPosts } = useQuery<Post[]>({ 
     queryKey: ['/api/community/posts'] 
   });
 
@@ -97,6 +97,10 @@ export default function Community() {
           <div className="grid gap-4">
             {loadingOpportunities ? (
               <div className="text-gray-400">Loading opportunities...</div>
+            ) : errorOpportunities ? (
+              <div className="text-red-400 p-4 border border-red-500/30 rounded bg-red-500/10">
+                Failed to load opportunities. Please check your connection.
+              </div>
             ) : opportunities?.length === 0 ? (
                <div className="text-center py-10 text-gray-400 bg-blue-900/10 rounded-xl border border-blue-900/20">
                  No opportunities found at the moment.
@@ -165,11 +169,15 @@ export default function Community() {
               <h2 className="text-xl font-semibold text-white">Trending Topics</h2>
               <Button size="sm" variant="secondary"><Plus className="mr-2 h-4 w-4" /> New Post</Button>
            </div>
-           
+
            <div className="space-y-4">
-             {loadingPosts ? (
-                <div className="text-gray-400">Loading discussions...</div>
-             ) : posts?.map(post => (
+              {loadingPosts ? (
+                 <div className="text-gray-400">Loading discussions...</div>
+              ) : errorPosts ? (
+                 <div className="text-red-400 p-4 border border-red-500/30 rounded bg-red-500/10">
+                   Failed to load discussions.
+                 </div>
+              ) : posts?.map(post => (
                <div key={post.id} className="p-6 rounded-xl bg-blue-950/20 border border-blue-900/30 hover:bg-blue-900/20 transition-colors cursor-pointer">
                   <div className="flex items-center gap-2 mb-3">
                     <Badge className="bg-purple-900/30 text-purple-300 hover:bg-purple-900/40 border-0">{post.domain}</Badge>
